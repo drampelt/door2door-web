@@ -1,0 +1,16 @@
+@(form: Form[Job])
+
+@main("Post a Job") {
+    @helper.form(action = routes.Jobs.create) {
+        @helper.inputText(form("name"))
+        @helper.textarea(form("description"))
+        @helper.inputText(form("location"))
+        @helper.input(form("payout")) { (id, name, value, args) =>
+            <input type="number" name="@name" id="@id" min="1">
+        }
+        @helper.input(form("positions")) { (id, name, value, args) =>
+            <input type="number" name="@name" id="@id" min="1">
+        }
+        <input type="submit" value="Submit">
+    }
+}

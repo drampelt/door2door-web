@@ -1,0 +1,13 @@
+@(form: Form[User])
+@main("Login") {
+    @if(form.hasGlobalErrors) {
+        @for(error <- form.globalErrors) {
+            <p>@error.message</p>
+        }
+    }
+    @helper.form(action = routes.Authentication.authenticate) {
+        @helper.inputText(form("email"))
+        @helper.inputPassword(form("password"))
+        <input type="submit" value="Login">
+    }
+}

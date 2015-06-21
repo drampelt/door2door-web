@@ -1,0 +1,5 @@
+- !!models.User
+  firstName: Daniel
+  lastName: Rampelt
+  email: drampelt@gmail.com
+  encryptedPassword: "$2a$04$ihenax0akqYGQEwOXekZueUm.xHc6xkK9dvolJpS6alfXyspKAjsq"
