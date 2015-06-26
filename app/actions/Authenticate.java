@@ -1,8 +1,12 @@
 package actions;
 
 import controllers.routes;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
 import models.JsonError;
 import models.User;
+import play.Play;
 import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http;
@@ -28,7 +32,22 @@ public @interface Authenticate {
         @Override
         public F.Promise<Result> call(Http.Context context) throws Throwable {
             String email = context.session().get("email");
-            // TODO: auth tokens
+
+            if (email == null) {
+                String[] authorization = context.request().headers().get("Authorization");
+                if (authorization != null && authorization.length > 0) {
+                    String[] split = authorization[0].split(" "); // Assuming only one authorization header
+                    if (split.length == 2 && split[0].equals("Bearer")) {
+                        String token = split[1];
+                        try {
+                            Jws<Claims> jws = Jwts.parser().setSigningKey(Play.application().configuration().getString("play.crypto.secret").getBytes()).parseClaimsJws(token);
+                            Object tokenEmail = jws.getBody().get("email");
+                            if (tokenEmail != null) email = tokenEmail.toString();
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+
             if (email == null) { // Not logged in
                 if (configuration.loggedIn()) {
                     if (context.request().accepts("text/html")) {

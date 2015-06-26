@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   javaCore,
   evolutions,
   "net.sf.flexjson" % "flexjson" % "3.3",
-  "org.mindrot" % "jbcrypt" % "0.3m"
+  "org.mindrot" % "jbcrypt" % "0.3m",
+  "io.jsonwebtoken" % "jjwt" % "0.5"
 )
 
 resolvers ++= Seq(

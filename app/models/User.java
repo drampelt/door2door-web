@@ -3,12 +3,15 @@ package models;
 import com.avaje.ebean.Model;
 import flexjson.JSON;
 import flexjson.JSONSerializer;
-import play.Logger;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import play.Play;
 import play.data.validation.Constraints;
-import sun.rmi.runtime.Log;
+import util.BaseJSONSerializer;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,9 +42,11 @@ public class User extends Model implements JsonSerializable {
 
     @Transient
     @Constraints.Required(groups = {SignupStep.class, LoginStep.class})
+    @Constraints.MinLength(8)
     public transient String password;
     @Transient
     @Constraints.Required(groups = SignupStep.class)
+    @Constraints.MinLength(8)
     public transient String passwordConfirmation;
 
     @OneToMany(cascade = CascadeType.REMOVE)
@@ -55,28 +60,29 @@ public class User extends Model implements JsonSerializable {
         this.passwordConfirmation = passwordConfirmation;
     }
 
-//    public String validate() {
-//        Logger.debug("Validating! pass:" + password + ", confirm:" + passwordConfirmation);
-//        if(password != null && passwordConfirmation != null && password.length() > 0 && !password.equals(passwordConfirmation)) {
-//            return "Password and password confirmation must match.";
-//        }
-//        return null;
-//    }
-
     public static Finder<Long, User> find = new Finder<>(User.class);
 
-    private JSONSerializer generateSerializer() {
-        return new JSONSerializer().prettyPrint(true);
+    @JSON(include = false)
+    public String getToken() {
+        return Jwts.builder()
+                .claim("email", email)
+                .setIssuedAt(new Date())
+                .setAudience("https://door2door")
+                .setIssuer("lt.danielrampe.door2door")
+                .setSubject(id.toString())
+                .signWith(SignatureAlgorithm.HS512, Play.application().configuration().getString("play.crypto.secret").getBytes())
+                .compact();
     }
 
     @Override
     public String toJson() {
-        return generateSerializer().serialize(this);
+        return new BaseJSONSerializer().serialize(this);
     }
 
-    public String toJson(boolean includeContracts) {
-        JSONSerializer serializer = generateSerializer();
-        if(includeContracts) serializer.include("contracts");
+    public String toJson(boolean includeContracts, boolean includeToken) {
+        JSONSerializer serializer = new BaseJSONSerializer();
+        if (includeContracts) serializer.include("contracts");
+        if (includeToken) serializer.include("token");
         return serializer.serialize(this);
     }
 }

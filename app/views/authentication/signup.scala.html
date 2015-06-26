@@ -1,0 +1,16 @@
+@(form: Form[User])
+@main("Signup") {
+    @if(form.hasGlobalErrors) {
+        @for(error <- form.globalErrors) {
+            <p>@error.message</p>
+        }
+    }
+    @helper.form(action = routes.Authentication.register) {
+        @helper.inputText(form("firstName"), '_label -> "First Name")
+        @helper.inputText(form("lastName"), '_label -> "Last Name")
+        @helper.inputText(form("email"), '_label -> "Email")
+        @helper.inputPassword(form("password"), '_label -> "Password")
+        @helper.inputPassword(form("passwordConfirmation"), '_label -> "Password Confirmation")
+        <input type="submit" value="Signup">
+    }
+}
